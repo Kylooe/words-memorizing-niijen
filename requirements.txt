@@ -1,0 +1,12 @@
+colorama==0.4.4
+ffmpeg-python==0.2.0
+google-api-core==2.11.1
+google-api-python-client==2.94.0
+google-auth==2.22.0
+google-auth-httplib2==0.1.0
+googleapis-common-protos==1.59.1
+httplib2==0.20.2
+pymongo==4.4.0
+pyttsx3==2.90
+youtube-transcript-api==0.6.1
+yt-dlp==2023.7.6
