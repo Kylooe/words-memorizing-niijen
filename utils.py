@@ -1,11 +1,14 @@
 import configparser
 import math
 import os
+import re
+import shutil
+from textwrap import wrap
 
 import colorama
 import ffmpeg
-import yt_dlp
 from pymongo import MongoClient
+from yt_dlp.postprocessor.common import PostProcessor
 
 colors = {
     'SelenTatsuki': '#7E4EAC',
@@ -41,6 +44,37 @@ colors = {
 }
 
 vtubers = [vtuber for vtuber in colors]
+
+# ffmpeg post processor for embedding captions
+class AddCaptionsPostProcessor(PostProcessor):
+    def __init__(self, downloader=None, word='', caption=''):
+        super().__init__(downloader)
+        self.word = word
+        self.caption = caption
+
+    # convert hex RGB color to ASS V4+ Styles color
+    def convert_color(self, uploader_id):
+        key = uploader_id[1:]
+        R, G, B = wrap(colors[key][1:], 2)
+        return f'&H00{B}{G}{R}&'
+        
+    def run(self, info):
+        config = get_config()
+        path = config['path']['videos_path']
+        video_name = os.path.splitext(os.path.basename(info['filepath']))[0]
+        ass_path = f'{path}/{self.word}/ass/{video_name}.ass'
+        shutil.copyfile(f'{path}/ass_template.txt', ass_path)
+        fore, back = re.split(re.compile(self.word, re.I), self.caption, 1)
+        color = self.convert_color(info['uploader_id'])
+        with open(ass_path, 'a') as ass:
+            ass.write(f'{fore}{{\\3a&H00&\\3c{color}}}{self.word}{{\\3c\\3a}}{back}') # render caption with outline target word
+
+        ffmpeg_input = ffmpeg.input(info['filepath'])
+        audio = ffmpeg_input.audio
+        video = ffmpeg_input.video.filter('subtitles', ass_path)
+        ffmpeg.output(video, audio, f'{path}/{self.word}/{video_name}.mp4').run()
+
+        return [], info
 
 def get_config():
     config = configparser.ConfigParser()
