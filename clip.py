@@ -7,15 +7,14 @@ from yt_dlp.utils import download_range_func
 
 from utils import get_config, get_database, print_error, AddCaptionsPostProcessor
 
-path = './nijien_words/'
-
 # clip video by caption and save the clips in terms of word
 def get_clips():
     config = get_config()
     db = get_database()
     words_collection = db[config['database']['words_collecion_name']]
     clips_limit = 8 # clip up to 8 videos for each word
-    for word_doc in words_collection.find({ 'captions': { '$exists': True }, 'downloaded': { '$exists': False } }).limit(1):
+    for word_doc in words_collection.find({ 'captions': { '$exists': True }, 'downloaded': { '$exists': False } }).limit(config['number']['words_per_videos']):
+        path = config['path']['root']
         word = word_doc['word']
         captions = word_doc['captions']
         os.mkdir(os.path.join(path, word, 'raw')) # create folder for clips downloaded from youtube
@@ -41,8 +40,9 @@ def get_clips():
             except:
                 print_error(f'download failed for [{word}]: {channel_name}')
                 continue
-        words_collection.update_one(
-            { 'word': word },
-            { '$set': { 'downloaded': True, 'captions.$[element].downloaded': True } },
-            array_filters=[{ 'element.video_id': { '$in': downloaded_videos } }]
-        )
+        if len(downloaded_videos) > 0:
+            words_collection.update_one(
+                { 'word': word },
+                { '$set': { 'downloaded': True, 'captions.$[element].downloaded': True } },
+                array_filters=[{ 'element.video_id': { '$in': downloaded_videos } }]
+            )

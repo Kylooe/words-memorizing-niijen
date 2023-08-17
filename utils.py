@@ -60,7 +60,7 @@ class AddCaptionsPostProcessor(PostProcessor):
         
     def run(self, info):
         config = get_config()
-        path = config['path']['videos_path']
+        path = config['path']['root']
         video_name = os.path.splitext(os.path.basename(info['filepath']))[0]
         ass_path = f'{path}/{self.word}/ass/{video_name}.ass'
         shutil.copyfile(f'{path}/ass_template.txt', ass_path)

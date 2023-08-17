@@ -36,6 +36,12 @@ def match_captions():
                 { '_id': word_doc.get('_id') },
                 { '$set': { 'captions': captions } }
             )
+        else:
+            # nobody ever said the word. mark the word as a dirty data.
+            words_collection.update_one(
+                { '_id': word_doc.get('_id') },
+                { '$set': { 'dirty': True } }
+            )
         count = 0
         captions = []
         channels = []
