@@ -81,10 +81,20 @@ def get_config():
     config.read('config.ini')
     return config
 
-def get_database():
-    config = get_config()
-    client = MongoClient(config['database']['host'])
-    return client[config['database']['db_name']]
+class MongoManager:
+    __database_instance = None
+
+    def __init__(self):
+        if MongoManager.__database_instance == None:
+            config = get_config()
+            client = MongoClient(config['database']['host'])
+            MongoManager.__database_instance = client[config['database']['db_name']]
+
+    @staticmethod
+    def get_database():
+        if MongoManager.__database_instance == None:
+             MongoManager()
+        return MongoManager.__database_instance
 
 def print_error(message):
     colorama.init(autoreset=True)

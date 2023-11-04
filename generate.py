@@ -3,10 +3,10 @@ import os
 import ffmpeg
 from gtts import gTTS
 
-from utils import get_config, get_database, print_error
+from utils import get_config, print_error, MongoManager
 
 __config = get_config()
-__db = get_database()
+__db = MongoManager.get_database()
 __words_collection = __db[__config['database']['words_collection_name']]
 __words_per_videos = __config['number']['words_per_videos']
 

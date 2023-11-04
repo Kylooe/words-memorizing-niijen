@@ -1,16 +1,13 @@
-import configparser
 from datetime import datetime
 import os
 import random
 import time
 
-import pymongo
 import colorama
 import googleapiclient.discovery
-import googleapiclient.errors
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from utils import get_config, get_database, vtubers
+from utils import get_config, vtubers, MongoManager
 
 def get_youtube():
     config = get_config()
@@ -28,7 +25,7 @@ def get_youtube():
 
 # get channel id and stream video playlist id of vtuber
 def get_id_list():
-    db = get_database()
+    db = MongoManager.get_database()
     vtubers_collection = db['vtuber_list']
     youtube = get_youtube()
     for name in vtubers:
@@ -54,7 +51,7 @@ def get_id_list():
 
 # get all of the stream videos by playlist id
 def get_video_list():
-    db = get_database()
+    db = MongoManager.get_database()
     video_collection = db['video_list']
     vtubers_collection = db['vtuber_list']
     youtube = get_youtube()
@@ -93,7 +90,7 @@ def get_video_list():
 
 # get captions of each video by video id
 def get_captions():
-    db = get_database()
+    db = MongoManager.get_database()
     caption_collection = db['caption_list']
     video_collection = db['video_list']
     video_list = video_collection.find()

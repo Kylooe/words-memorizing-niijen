@@ -1,11 +1,11 @@
 import re
 
-from utils import get_config, get_database, vtubers
+from utils import get_config, vtubers, MongoManager
 
 # match captions that include the specific word
 def match_captions():
     config = get_config()
-    db = get_database()
+    db = MongoManager.get_database()
     caption_collection = db['caption_list']
     words_collection = db[config['database']['words_collecion_name']]
     captions = []
